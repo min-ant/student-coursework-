@@ -1,1 +1,142 @@
 https://www.tinkercad.com/things/6zgZB9UNjVp-auto-light-coursework?sharecode=X7jmNB35PIbLEgphKLtQMoJcxNl1JONWI7cNgF-ZCto
+
+#include <LiquidCrystal_I2C.h>
+
+
+LiquidCrystal_I2C lcd(32,16,2);
+//sensors room1
+const int l1 = A3;
+  const int u1 = 3; 
+  int x=0 ;// counter to see if light is on
+  int y=0 ;// counter to see if ultrasonic is on
+//sensors room 2
+const int l2 = A1;
+  const int u2 = 5; 
+  int n=0 ;// counter to see if light is on
+  int m=0 ;// counter to see if ultrasonic is on
+//other
+ const int threshold = 100;// ultrasonic distance
+  const int p = A2;
+
+void setup()
+{
+  Serial.begin(9600);
+  pinMode(A2, INPUT);
+  pinMode(A3, INPUT);
+  pinMode(3, INPUT);
+  pinMode(5, INPUT);
+  pinMode(A1, INPUT);
+  pinMode(9, OUTPUT);
+  pinMode(11, OUTPUT);
+  
+  lcd. init();//Starting the lcd
+  lcd.setCursor(0,0);
+  lcd.backlight();
+  lcd.display();
+}
+
+void loop(){
+   //potentiomiter
+  int pscale = 0.24926686* analogRead(p);// intensity of light
+  Serial.println(pscale);
+  
+
+  
+  // light sensor
+  int Lsen1 = analogRead(l1);
+  Serial.println(Lsen1);
+
+  if (Lsen1 < 10 ){
+    analogWrite(11,pscale); 
+    delay(1000);
+  }
+  else{
+    if(y<1){
+      digitalWrite(11,LOW);
+      delay(1000);
+      x=x+1;
+      y=0;}
+  }
+   int Lsen2 = analogRead(l2);
+  Serial.println(Lsen2);
+
+  if (Lsen2 < 10 ){
+    analogWrite(9,pscale); 
+    delay(1000);
+  }
+  else{
+    if(m<1){
+      digitalWrite(9,LOW);
+      delay(1000);
+      n=n+1;
+      m=0;}
+  }
+  
+  //ultrasonic sensor
+  
+  long duration, distance;//room 1
+  distance = duration * 0.034 / 2;
+  
+  pinMode(u1, OUTPUT);// sends out pulse
+  digitalWrite(u1, LOW);
+  digitalWrite(u1, HIGH);
+  digitalWrite(u1, LOW);
+
+  pinMode(u1, INPUT);
+  duration = pulseIn(u1, HIGH);
+ 
+  if (distance > 0 && distance < threshold && x > 1) {
+      analogWrite(11,pscale); 
+      x=0;
+      delay(2000);
+      y=y+1;
+     
+  }  else {
+   digitalWrite(11,LOW);
+  y=0;
+  }
+  long duration2, distance2;//room 2
+  distance2 = duration2 * 0.034 / 2;
+  
+  pinMode(u2, OUTPUT);
+  digitalWrite(u2, LOW);
+  digitalWrite(u2, HIGH);
+  digitalWrite(u2, LOW);
+
+  pinMode(u2, INPUT);
+  duration2 = pulseIn(u2, HIGH);
+  
+ 
+  if (distance2 > 0 && distance2 < threshold && n > 1) {
+      analogWrite(9,pscale); 
+      n=0;
+      delay(2000);
+      m=m+1;
+     
+  }  else {
+   digitalWrite(9,LOW);
+  m=0;
+  }
+
+    // lcd
+   lcd.setCursor(0,0);// printing potentiomiter reading
+  lcd.print("light intensity");
+  lcd.setCursor(0,1);
+  lcd.print(pscale);
+  lcd.setCursor(3,1);
+  lcd.print("/255");
+    delay(2000);
+  lcd.clear();
+  
+   lcd.setCursor(0,0);// room 1 check
+  lcd.print("room 1");
+  lcd.setCursor(0,1);
+  if(y>1 or x<1){
+     lcd.setCursor(3,1);
+     lcd.print("on");
+     }
+  else{
+     lcd.setCursor(3,1);
+     lcd.print("off");
+  }
+}
