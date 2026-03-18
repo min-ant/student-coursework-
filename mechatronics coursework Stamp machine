@@ -1,0 +1,32 @@
+#include <IskakINO_LiquidCrystal_I2C.h>
+#include <Servo.h>
+#include <Wire.h>
+
+LiquidCrystal_I2C lcd(16, 2);
+Servo myservo;
+const int pot = A3;
+
+void setup() {
+Serial.begin(9600);
+
+myservo.attach(9);
+
+lcd.begin();
+lcd.backlight();
+
+
+
+}
+void loop() {
+
+ 
+
+  float movement = analogRead(pot);
+  float range = (movement / 2.84166667) - 90;
+  Serial.println(range);
+
+  myservo.write(range);        
+  delay(100);             
+
+
+}
